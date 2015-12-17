@@ -5,14 +5,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
-	private final int port = 8888;
+	private final int port = 8080;
+	private final int brojKonekcija = 4;
 	
 	private ServerSocket server;
 	private Konekcija[] konekcije;
 	
 	public Server() {
-		konekcije = new Konekcija[4];
-		this.startServer();
+		konekcije = new Konekcija[brojKonekcija];
 	}
 	
 	public void startServer() {
@@ -34,7 +34,14 @@ public class Server {
 		}
 	}
 	
-	public static void main(String...strings) throws IOException {
-		new Server();
+	public void closeServer() {
+		if(server == null || server.isClosed())
+			return;
+		try {
+			server.close();
+			System.out.println("SERVER ZATVOREN");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

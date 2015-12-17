@@ -82,7 +82,7 @@ public class Klijent extends JFrame
 			ableToType(false);
 			try {
 				output.close();
-				//input.close();
+				input.close();
 				connection.close();
 			} catch (IOException e) {
 				e.printStackTrace();
