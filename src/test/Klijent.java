@@ -16,6 +16,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import models.Poruka;
+
 public class Klijent extends JFrame
 {
 	private static final long serialVersionUID = 1146175602814370591L;
@@ -24,7 +26,8 @@ public class Klijent extends JFrame
 	private JTextArea chatWindow;
 	private ObjectOutputStream output; //odlazece poruke
 	private ObjectInputStream input;   //dolazece poruke
-	private String message = "";
+	//private String message = "";
+	private Poruka message = null;
 	private String serverIP;
 	private Socket connection;
 	
@@ -53,7 +56,7 @@ public class Klijent extends JFrame
 		try {
 			//konekcija na server
 			showMessage(" Attempting connection... \n");
-			this.connection = new Socket(InetAddress.getByName(serverIP), 8888);
+			this.connection = new Socket(InetAddress.getByName(serverIP), 8080);
 			showMessage("\n Connected to: " + connection.getInetAddress().getHostName());
 			/* Kad se otvori konekcija
 			 *     1)napravi streamove:
@@ -66,7 +69,7 @@ public class Klijent extends JFrame
 			ableToType(true);
 			do {
 				try {
-					message = (String)input.readObject();
+					message = (Poruka)input.readObject();
 					showMessage("\n" + message);
 				} catch (ClassNotFoundException e) {
 					showMessage("\n UNKNOWN OBJECT \n");

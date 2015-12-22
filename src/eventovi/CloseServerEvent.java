@@ -17,5 +17,6 @@ public class CloseServerEvent extends WindowAdapter{
 	public void windowClosing(WindowEvent arg0) {
 		server.closeServer();
 		super.windowClosing(arg0);
+		System.exit(0);
 	}
 }

@@ -19,6 +19,7 @@ public class GlavniProzor extends JFrame {
 	private JTabbedPane tabbedPane;
 	private JButton serverStartBtn;
 	
+	private JPanel glavniPanel;
 	private ArrayList<JPanelKonekcija> paneli;
 	private Server server;
 	
@@ -26,7 +27,8 @@ public class GlavniProzor extends JFrame {
 		tabbedPane = new JTabbedPane();
 		paneli = new ArrayList<JPanelKonekcija>();
 		this.server = server;
-		serverStartBtn = new JButton("...Zapocni server...");
+		server.addListener(this);
+		serverStartBtn = new JButton("...POKRENI SERVER...");
 		
 		setTitle("Server aplikacija");
 		setSize(600, 300);
@@ -34,19 +36,18 @@ public class GlavniProzor extends JFrame {
 		setVisible(true);
 		add(tabbedPane);
 		
-		JPanel mainPanel = new JPanelKonekcija(null);
-		paneli.add((JPanelKonekcija) mainPanel);
+		this.glavniPanel = new JPanel();
 		
-		mainPanel.setLayout(new GridLayout(3, 3));
-		mainPanel.add(serverStartBtn);
+		glavniPanel.setLayout(new GridLayout(3, 3));
+		glavniPanel.add(serverStartBtn);
 		serverStartBtn.addActionListener(new StartServerEvent(server));
 		
-		tabbedPane.addTab("Glavni", mainPanel);
+		tabbedPane.addTab("Glavni", glavniPanel);
 	}
 	
 	public void addPanel(Konekcija konekcija) {
-		JPanel panel = new JPanel();
-		paneli.add((JPanelKonekcija) panel);
+		JPanelKonekcija panel = new JPanelKonekcija(konekcija);
+		paneli.add(panel);
 		tabbedPane.addTab(konekcija.toString(), panel);
 	}
 	

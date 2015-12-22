@@ -64,21 +64,22 @@ public class Konekcija implements Runnable {
 				/**
 				 * izmeni da sistem salje (i prima) objekte klase Poruka (ne String)
 				 */
-				Poruka porukaa = new Poruka("dir", "C:/bullshit/", "dir");
-				posaljiPoruku("BEGIN");
-				posaljiPoruku("BEGIN2");
-				posaljiPoruku("BEGIN3");
-				posaljiPoruku("BEGINFUCKING4");
-				posaljiPoruku("END");
-				String poruka = "";
+				posaljiPoruku(new Poruka("", "START", ""));
+				posaljiPoruku(new Poruka("", "tekst1", ""));
+				posaljiPoruku(new Poruka("", "tekst2", ""));
+				posaljiPoruku(new Poruka("", "tekst3", ""));
+				posaljiPoruku(new Poruka("", "tekst4", ""));
+				posaljiPoruku(new Poruka("", "END", ""));
+				posaljiPoruku(new Poruka("", "SHUTDOWN", ""));
+				Poruka poruka = null;
 				do {
 					try {
-						poruka = (String)input.readObject();
+						poruka = (Poruka)input.readObject();
 						log(poruka);
 					} catch (ClassNotFoundException cnf) {
 						log("~Nepoznata klasa od strane klijenta!");
 					}
-				} while(!poruka.equals("END"));
+				} while(!poruka.getFajl().equals("END"));
 				
 			} catch (Exception eof) {
 				log("~Prekinuta konekcija sa klijentom");
@@ -94,7 +95,19 @@ public class Konekcija implements Runnable {
 		} 
 	}
 	
-	private void log(String poruka) {
+	public void close() {
+		try {
+			konekcija.close();
+			input.close();
+			output.close();
+			log("~Nasilno prekinuta konekcija (I/O sistem uklonjen.)");
+			work = false;
+		} catch (IOException io) {
+			io.printStackTrace();
+		}
+	}
+	
+	private void log(Object poruka) {
 		System.out.println(this + ": " + poruka);
 	}
 }

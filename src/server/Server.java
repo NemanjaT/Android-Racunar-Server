@@ -3,6 +3,10 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.ArrayList;
+
+import grafika.GlavniProzor;
 
 public class Server {
 	private final int port = 8080;
@@ -11,8 +15,11 @@ public class Server {
 	private ServerSocket server;
 	private Konekcija[] konekcije;
 	
+	private ArrayList<GlavniProzor> glavniProzori;
+	
 	public Server() {
 		konekcije = new Konekcija[brojKonekcija];
+		glavniProzori = new ArrayList<GlavniProzor>();
 	}
 	
 	public void startServer() {
@@ -25,12 +32,15 @@ public class Server {
 					if(konekcije[i] == null || !konekcije[i].works()) {
 						konekcije[i] = new Konekcija(socket);
 						new Thread(konekcije[i]).start();
+						for(GlavniProzor gp : glavniProzori)
+							gp.addPanel(konekcije[i]);
 						break;
 					}
 				}
 			}
 		} catch (IOException io) {
-			io.printStackTrace();
+			server = null;
+			System.out.println("Socket prekinut - ugasen server");
 		}
 	}
 	
@@ -43,5 +53,15 @@ public class Server {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean serverRunning() {
+		if(server == null)
+			return false;
+		return !server.isClosed();
+	}
+	
+	public void addListener(GlavniProzor glavniProzor) {
+		glavniProzori.add(glavniProzor);
 	}
 }

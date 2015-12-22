@@ -9,7 +9,7 @@ public class Poruka implements Serializable {
 	private String[] argumenti;
 	private String ekstenzija;
 	
-	public Poruka() {}
+	public Poruka() { }
 	
 	public Poruka(String komanda, String fajl, String ekstenzija, String... argumenti) {
 		this.komanda    = komanda;
