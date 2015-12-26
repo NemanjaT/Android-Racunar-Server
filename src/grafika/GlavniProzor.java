@@ -35,6 +35,12 @@ public class GlavniProzor extends JFrame {
 		addWindowListener(new CloseServerEvent(server));
 		setVisible(true);
 		add(tabbedPane);
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
 		
 		this.glavniPanel = new JPanel();
 		
@@ -48,7 +54,17 @@ public class GlavniProzor extends JFrame {
 	public void addPanel(Konekcija konekcija) {
 		JPanelKonekcija panel = new JPanelKonekcija(konekcija);
 		paneli.add(panel);
+		konekcija.addListener(this);
 		tabbedPane.addTab(konekcija.toString(), panel);
+	}
+	
+	public void checkPanels() {
+		for (int i = paneli.size() - 1; i >= 0; i--) {
+			if(!paneli.get(i).getKonekcija().works()) {
+				tabbedPane.remove(paneli.get(i));
+				paneli.remove(i);
+			}
+		}
 	}
 	
 	public Server getServer() {
