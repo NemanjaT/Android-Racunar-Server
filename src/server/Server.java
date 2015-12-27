@@ -3,30 +3,31 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 import grafika.GlavniProzor;
 
 public class Server {
-	private final int port = 8080;
-	private final int brojKonekcija = 4;
+	private static final int PORT           = 8080;
+	private static final int BROJ_KONEKCIJA = 4;
 	
 	private ServerSocket server;
 	private Konekcija[] konekcije;
 	
 	private ArrayList<GlavniProzor> glavniProzori;
+	private boolean work;
 	
 	public Server() {
-		konekcije = new Konekcija[brojKonekcija];
-		glavniProzori = new ArrayList<GlavniProzor>();
+		konekcije = new Konekcija[BROJ_KONEKCIJA];
+		glavniProzori = new ArrayList<>();
 	}
 	
 	public void startServer() {
 		try {
-			server = new ServerSocket(port);
-			System.out.println("SERVER SLUSA NA PORTU: " + port);
-			while (true) {
+			server = new ServerSocket(PORT);
+			log("SERVER SLUSA NA PORTU: " + PORT);
+			work = true;
+			while (work) {
 				Socket socket = server.accept();
 				for(int i = 0; i < konekcije.length; i++) {
 					if(konekcije[i] == null || !konekcije[i].works()) {
@@ -40,7 +41,7 @@ public class Server {
 			}
 		} catch (IOException io) {
 			server = null;
-			System.out.println("Socket prekinut - ugasen server");
+			log("Socket prekinut - ugasen server");
 		}
 	}
 	
@@ -49,19 +50,24 @@ public class Server {
 			return;
 		try {
 			server.close();
-			System.out.println("SERVER ZATVOREN");
+			log("SERVER ZATVOREN");
+			work = false;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public boolean serverRunning() {
-		if(server == null)
-			return false;
-		return !server.isClosed();
+		return server != null && !server.isClosed();
 	}
 	
 	public void addListener(GlavniProzor glavniProzor) {
 		glavniProzori.add(glavniProzor);
+	}
+
+	private void log(String log) {
+		System.out.println(log);
+		for(GlavniProzor gp : glavniProzori)
+			gp.addLog(log);
 	}
 }

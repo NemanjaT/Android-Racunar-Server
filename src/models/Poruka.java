@@ -16,9 +16,7 @@ public class Poruka implements Serializable {
 		this.fajl       = fajl;
 		this.ekstenzija = ekstenzija;
 		this.argumenti  = new String[argumenti.length];
-		for(int i = 0; i < argumenti.length; i++) {
-			this.argumenti[i] = argumenti[i];
-		}
+		System.arraycopy(argumenti, 0, this.argumenti, 0, argumenti.length);
 	}
 	
 	public String getKomanda() {

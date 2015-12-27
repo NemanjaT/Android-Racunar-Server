@@ -7,7 +7,7 @@ public class PorukaGroup implements Serializable {
 	ArrayList<Poruka> poruke;
 	
 	public PorukaGroup() {
-		poruke = new ArrayList<Poruka>();
+		poruke = new ArrayList<>();
 	}
 
 	public ArrayList<Poruka> getPoruke() {

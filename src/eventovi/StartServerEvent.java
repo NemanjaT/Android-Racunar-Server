@@ -19,19 +19,13 @@ public class StartServerEvent implements ActionListener {
 	public void actionPerformed(ActionEvent arg0) {
 		if(!server.serverRunning()) {
 			((JButton)(arg0.getSource())).setText("...PREKINI SERVER...");
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
+			new Thread(() -> {
 					server.startServer();
-				}
 			}).start();
 		} else {
 			((JButton)(arg0.getSource())).setText("...POKRENI SERVER...");
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
+			new Thread(() -> {
 					server.closeServer();
-				}
 			}).start();
 		}
 	}

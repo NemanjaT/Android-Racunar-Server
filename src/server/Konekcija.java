@@ -1,11 +1,9 @@
 package server;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 import grafika.GlavniProzor;
@@ -26,7 +24,7 @@ public class Konekcija implements Runnable {
 		this.id = ID++;
 		this.work = false;
 		this.konekcija = konekcija;
-		this.glavniProzori = new ArrayList<GlavniProzor>();
+		this.glavniProzori = new ArrayList<>();
 	}
 	
 	public boolean works() {
@@ -65,9 +63,6 @@ public class Konekcija implements Runnable {
 			output.flush();
 			input = new ObjectInputStream(konekcija.getInputStream());
 			log("~Postavljen I/O Sistem!");
-			/**
-			 * izmeni da sistem salje (i prima) objekte klase Poruka (ne String)
-			 */
 			posaljiPoruku(new Poruka("", "START", ""));
 			posaljiPoruku(new Poruka("", "tekst1", ""));
 			posaljiPoruku(new Poruka("", "tekst2", ""));
@@ -75,7 +70,7 @@ public class Konekcija implements Runnable {
 			posaljiPoruku(new Poruka("", "tekst4", ""));
 			posaljiPoruku(new Poruka("", "END", ""));
 			posaljiPoruku(new Poruka("", "SHUTDOWN", ""));
-			Poruka poruka = null;
+			Poruka poruka = new Poruka();
 			do {
 				try {
 					poruka = (Poruka)input.readObject();
@@ -114,5 +109,7 @@ public class Konekcija implements Runnable {
 	
 	private void log(Object poruka) {
 		System.out.println(this + ": " + poruka);
+		for(GlavniProzor gp : glavniProzori)
+			gp.konekcijaLog(this, poruka.toString());
 	}
 }
