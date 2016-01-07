@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class Poruka implements Serializable {
+    static final long serialVersionUID = -189968662588969806L;
     private String komanda;
     private String fajl;
     private String[] argumenti;
