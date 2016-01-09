@@ -2,6 +2,8 @@ package models;
 
 import java.awt.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -25,15 +27,17 @@ public class FileSystem {
 		return resultList;
 	}
 	
-	public ArrayList<String> getFilesAndDirectories(String path) {
-		ArrayList<String> stringList = new ArrayList<>();
+	public ArrayList<Poruka> getFilesAndDirectories(String path) {
+		ArrayList<Poruka> stringList = new ArrayList<>();
 		File[] files = new File(path).listFiles();
 		if(files != null)
             for(File file : files)
                 if (file.isDirectory())
-                    stringList.add(file.getName() + "|DIR");
-                else
-                    stringList.add(file.getName() + "|???");
+                    stringList.add(new Poruka("", file.getName(), "DIR"));
+                else {
+					String[] delovi = file.getName().split("\\.");
+					stringList.add(new Poruka("", file.getName(), delovi[delovi.length - 1].toUpperCase()));
+				}
 		return stringList;
 	}
 
@@ -52,18 +56,27 @@ public class FileSystem {
 		return solved;
 	}
 
-	public byte[] fileToByte(String path) {
+	public boolean deleteFileLocally(String path) {
+		boolean solved = false;
 		File file = new File(path);
-		if(!file.isFile())
-			return null;
-		return new byte[(int)file.length()];
+		if(!file.isDirectory())
+			if(file.delete())
+				solved = true;
+		return solved;
 	}
 
-	public boolean sendFile(byte[] bytes, OutputStream output) {
+	public boolean sendFileToClient(String path, OutputStream os) {
 		boolean solved = false;
 		try {
-			output.write(bytes, 0, bytes.length);
-			output.flush();
+			File file = new File(path);
+			if (!file.isFile())
+				return false;
+			byte[] nizBitova = new byte[(int) file.length()];
+			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+			int bytesRead = bis.read(nizBitova, 0, nizBitova.length);
+			System.out.println(bytesRead);
+			os.write(nizBitova, 0, nizBitova.length);
+			os.flush();
 			solved = true;
 		} catch (IOException e) {
 			e.printStackTrace();

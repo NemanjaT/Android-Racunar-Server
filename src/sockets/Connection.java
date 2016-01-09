@@ -62,29 +62,18 @@ public class Connection implements Runnable {
             output.flush();
             input = new ObjectInputStream(connection.getInputStream());
             log("~Setting up I/O!");
-            /**
-             * TEMP START
-             */
-            sendMsg(new Poruka("", "START", ""));
-            ArrayList<String> drajvovi = fileSystem.getDrives();
-            for(String drajv : drajvovi) {
-                sendMsg(new Poruka("", drajv, ""));
-            }
-            sendMsg(new Poruka("", "END", ""));
-            /**
-             * TEMP END
-             */
+            handleResponse(new Poruka("GETDIRS", "", ""));
             Poruka msg = new Poruka();
             do {
                 try {
                     msg = (Poruka)input.readObject();
-                    log(msg);
+                    log("+File recieved: " + msg.toString());
                     handleResponse(msg);
                 } catch (ClassNotFoundException cnf) {
                     log("~Unknown class recieved from client!");
                 }
-            } while(!msg.getFajl().equals("SHUTDOWN"));
-
+            } while(!msg.getKomanda().equals("SHUTDOWN"));
+            sendMsg(new Poruka("", "SHUTDOWN", ""));
         } catch (Exception eof) {
             log("~Connection with the client shut down.");
         } finally {
@@ -119,7 +108,7 @@ public class Connection implements Runnable {
     }
 
     private void log(Object poruka) {
-        System.out.println("+File recieved: " + this + ": " + poruka);
+        System.out.println(this + ": " + poruka);
         for(ConnectionListener cl : listeners)
             cl.connectionLogEvent(this, poruka.toString());
     }
@@ -128,14 +117,44 @@ public class Connection implements Runnable {
         String upperKomanda = "";
         if(poruka.getKomanda() != null)
             upperKomanda = poruka.getKomanda().toUpperCase();
+        if(poruka.getFajl().equals("") && upperKomanda.equals("DIR")) {
+            handleResponse(new Poruka("GETDIRS", "", ""));
+            return;
+        }
         switch(upperKomanda) {
+            case "SHUTDOWN":
+                return;
             case "DIR":
-                ArrayList<String> filesAndDirectories = fileSystem.getFilesAndDirectories(poruka.getFajl());
+                ArrayList<Poruka> filesAndDirectories = fileSystem.getFilesAndDirectories(poruka.getFajl());
                 sendMsg(new Poruka("", "START", ""));
-                for(String fad : filesAndDirectories) {
-                    sendMsg(new Poruka("", fad, ""));
-                }
+                sendMsg(new Poruka("", "..", ""));
+                filesAndDirectories.forEach(this::sendMsg);
                 sendMsg(new Poruka("", "END", ""));
+                break;
+            case "GETDIRS":
+                ArrayList<String> dirs = fileSystem.getDrives();
+                sendMsg(new Poruka("", "START", ""));
+                for(String dir : dirs)
+                    sendMsg(new Poruka("", dir, ""));
+                sendMsg(new Poruka("", "END", ""));
+                break;
+            case "RUN":
+                fileSystem.openFileLocally(poruka.getFajl());
+                break;
+            case "DELETE":
+                if(fileSystem.deleteFileLocally(poruka.getFajl())) {
+                    String[] putanjaDelovi = poruka.getFajl().split("\\\\");
+                    String temp = "";
+                    for(int i = 0; i < putanjaDelovi.length - 1; i++) {
+                        temp += putanjaDelovi[i] + "\\";
+                    }
+                    handleResponse(new Poruka("DIR", temp, ""));
+                } else {
+                    sendMsg(new Poruka("", "NE", ""));
+                }
+                break;
+            case "TAKE":
+                fileSystem.sendFileToClient(poruka.getFajl(), output);
                 break;
             default:
                 sendMsg(new Poruka("", "START", ""));
@@ -143,6 +162,14 @@ public class Connection implements Runnable {
                 sendMsg(new Poruka("", "Komanda ne postoji!", ""));
                 sendMsg(new Poruka("", "~*~ ~*~ ~*~ ~*~ ~*~", ""));
                 sendMsg(new Poruka("", "END", ""));
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000);
+                        handleResponse(new Poruka("GETDIRS", "", ""));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
         }
     }
 }
