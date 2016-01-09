@@ -1,5 +1,6 @@
 package sockets;
 
+import models.FileSystem;
 import sockets.dependencies.ConnectionListener;
 import models.Poruka;
 
@@ -17,6 +18,7 @@ public class Connection implements Runnable {
     private ObjectInputStream input;
     private ObjectOutputStream output;
     private volatile boolean works;
+    private FileSystem fileSystem;
 
     private ArrayList<ConnectionListener> listeners;
 
@@ -25,6 +27,7 @@ public class Connection implements Runnable {
         this.works = false;
         this.connection = connection;
         this.listeners = new ArrayList<>();
+        this.fileSystem = new FileSystem();
     }
 
     public Connection(Socket connection, ConnectionListener listener) {
@@ -63,12 +66,11 @@ public class Connection implements Runnable {
              * TEMP START
              */
             sendMsg(new Poruka("", "START", ""));
-            sendMsg(new Poruka("", "tekst1", ""));
-            sendMsg(new Poruka("", "tekst2", ""));
-            sendMsg(new Poruka("", "tekst3", ""));
-            sendMsg(new Poruka("", "tekst4", ""));
+            ArrayList<String> drajvovi = fileSystem.getDrives();
+            for(String drajv : drajvovi) {
+                sendMsg(new Poruka("", drajv, ""));
+            }
             sendMsg(new Poruka("", "END", ""));
-            sendMsg(new Poruka("", "SHUTDOWN", ""));
             /**
              * TEMP END
              */
@@ -77,10 +79,11 @@ public class Connection implements Runnable {
                 try {
                     msg = (Poruka)input.readObject();
                     log(msg);
+                    handleResponse(msg);
                 } catch (ClassNotFoundException cnf) {
                     log("~Unknown class recieved from client!");
                 }
-            } while(!msg.getFajl().equals("BLA"));
+            } while(!msg.getFajl().equals("SHUTDOWN"));
 
         } catch (Exception eof) {
             log("~Connection with the client shut down.");
@@ -116,8 +119,30 @@ public class Connection implements Runnable {
     }
 
     private void log(Object poruka) {
-        System.out.println(this + ": " + poruka);
+        System.out.println("+File recieved: " + this + ": " + poruka);
         for(ConnectionListener cl : listeners)
             cl.connectionLogEvent(this, poruka.toString());
+    }
+
+    private void handleResponse(Poruka poruka) {
+        String upperKomanda = "";
+        if(poruka.getKomanda() != null)
+            upperKomanda = poruka.getKomanda().toUpperCase();
+        switch(upperKomanda) {
+            case "DIR":
+                ArrayList<String> filesAndDirectories = fileSystem.getFilesAndDirectories(poruka.getFajl());
+                sendMsg(new Poruka("", "START", ""));
+                for(String fad : filesAndDirectories) {
+                    sendMsg(new Poruka("", fad, ""));
+                }
+                sendMsg(new Poruka("", "END", ""));
+                break;
+            default:
+                sendMsg(new Poruka("", "START", ""));
+                sendMsg(new Poruka("", "~*~ ~*~ ~*~ ~*~ ~*~", ""));
+                sendMsg(new Poruka("", "Komanda ne postoji!", ""));
+                sendMsg(new Poruka("", "~*~ ~*~ ~*~ ~*~ ~*~", ""));
+                sendMsg(new Poruka("", "END", ""));
+        }
     }
 }

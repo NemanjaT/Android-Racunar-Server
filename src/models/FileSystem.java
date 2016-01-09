@@ -57,7 +57,6 @@ public class FileSystem {
 		if(!file.isFile())
 			return null;
 		return new byte[(int)file.length()];
-
 	}
 
 	public boolean sendFile(byte[] bytes, OutputStream output) {
