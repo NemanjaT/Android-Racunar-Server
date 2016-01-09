@@ -4,6 +4,7 @@ import models.FileSystem;
 import sockets.dependencies.ConnectionListener;
 import models.Poruka;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -154,7 +155,17 @@ public class Connection implements Runnable {
                 }
                 break;
             case "TAKE":
-                fileSystem.sendFileToClient(poruka.getFajl(), output);
+                File file = new File(poruka.getFajl());
+                if(!file.isFile())
+                    sendMsg(new Poruka("", "NE", ""));
+                String[] ekstenzija = poruka.getFajl().split("\\\\");
+                sendMsg(new Poruka("GIVE", String.valueOf((int)file.length()), ekstenzija[ekstenzija.length - 1]));
+                fileSystem.sendFileToClient(file, output);
+                if(fileSystem.sendFileToClient(file, output)) {
+                    System.out.println("uspesno slanje podataka");
+                } else {
+                    System.out.println("zajebali smo slanje podataka");
+                }
                 break;
             default:
                 sendMsg(new Poruka("", "START", ""));

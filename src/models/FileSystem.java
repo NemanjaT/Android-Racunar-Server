@@ -65,21 +65,30 @@ public class FileSystem {
 		return solved;
 	}
 
-	public boolean sendFileToClient(String path, OutputStream os) {
+	public boolean sendFileToClient(File file, OutputStream os) {
 		boolean solved = false;
+		BufferedInputStream bis = null;
+		FileInputStream fis = null;
 		try {
-			File file = new File(path);
-			if (!file.isFile())
-				return false;
-			byte[] nizBitova = new byte[(int) file.length()];
-			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-			int bytesRead = bis.read(nizBitova, 0, nizBitova.length);
-			System.out.println(bytesRead);
-			os.write(nizBitova, 0, nizBitova.length);
-			os.flush();
-			solved = true;
+			byte[] byteArray = new byte[(int) file.length()];
+			fis = new FileInputStream(file);
+			bis = new BufferedInputStream(fis);
+			if(bis.read(byteArray, 0, byteArray.length) > -1) {
+				os.write(byteArray, 0, byteArray.length);
+				os.flush();
+				solved = true;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				if (fis != null)
+					fis.close();
+				if (bis != null)
+					bis.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return solved;
 	}
