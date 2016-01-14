@@ -21,6 +21,7 @@ public class MainController implements ConnectionListener, Initializable {
     @FXML protected TextArea serverLogTextArea;
     @FXML protected Button TFServerButton;
     @FXML protected TabPane tabPane;
+    @FXML protected Tab mainTab;
 
     protected Server server;
     protected HashMap<Tab, ConnectionTabController> connectionTabs;
@@ -109,6 +110,12 @@ public class MainController implements ConnectionListener, Initializable {
     @Override
     public void connectionLogEvent(Connection connection, String msg) {
         connectionTabs.entrySet().stream().filter(ct -> ct.getValue().getConnection() == connection).forEach(ct -> ct.getValue().addLog(msg));
+    }
+
+    @Override
+    public void serverOff() {
+        connectionTabs.clear();
+        tabPane.getTabs().stream().filter(tab -> tab != mainTab).forEach(tab -> tabPane.getTabs().remove(tab));
     }
 
     /**

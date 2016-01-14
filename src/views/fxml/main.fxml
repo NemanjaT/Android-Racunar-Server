@@ -9,7 +9,7 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml">
     <center>
         <TabPane fx:id="tabPane">
-            <Tab text="Server" closable="false">
+            <Tab text="Server" closable="false" fx:id="mainTab">
                 <GridPane vgap="10" hgap="10" alignment="CENTER" scaleShape="true" gridLinesVisible="false">
                     <padding>
                         <Insets top="10" left="10" right="10" bottom="10" />
@@ -18,8 +18,8 @@
                             GridPane.hgrow="ALWAYS" />
                     <TextArea editable="false" promptText="Server log" maxWidth="Infinity" fx:id="serverLogTextArea"
                               GridPane.rowIndex="1" GridPane.hgrow="ALWAYS" />
-                    <Button text="Request log" maxWidth="Infinity" onAction="#requestLog_Click"
-                            GridPane.rowIndex="2" GridPane.hgrow="ALWAYS" />
+                    <!--Button text="Request log" maxWidth="Infinity" onAction="#requestLog_Click"
+                            GridPane.rowIndex="2" GridPane.hgrow="ALWAYS" /-->
                 </GridPane>
             </Tab>
         </TabPane>

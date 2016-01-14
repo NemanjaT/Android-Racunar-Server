@@ -63,6 +63,7 @@ public class Server {
             server.close();
             log("SERVER CLOSED");
             works = false;
+            listeners.forEach(ConnectionListener::serverOff);
         } catch (IOException e) {
             e.printStackTrace();
         }
